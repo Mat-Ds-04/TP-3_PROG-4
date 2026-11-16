@@ -21,7 +21,9 @@ async function solicitar(ruta, token, opciones = {}) {
   const resultado = await respuesta.json();
   if (!respuesta.ok) {
     const detalle = resultado.errors?.map((error) => error.msg).join('. ');
-    throw new Error(resultado.error || detalle || 'No se pudo completar la solicitud');
+    const error = new Error(resultado.error || detalle || 'No se pudo completar la solicitud');
+    error.status = respuesta.status;
+    throw error;
   }
   return resultado.data;
 }
@@ -675,23 +677,32 @@ export default function App() {
   const [usuario, setUsuario] = useState(null);
   const [seccionPublica, setSeccionPublica] = useState('inicio');
   const [cargando, setCargando] = useState(Boolean(token));
+  const [errorSesion, setErrorSesion] = useState('');
+  const [intentoValidacion, setIntentoValidacion] = useState(0);
 
   useEffect(() => {
     if (!token) {
       setUsuario(null);
+      setErrorSesion('');
       setCargando(false);
       return;
     }
 
+    setCargando(true);
+    setErrorSesion('');
     solicitar('/auth/me', token)
       .then(setUsuario)
-      .catch(() => {
-        sessionStorage.removeItem('token');
-        setToken('');
-        setUsuario(null);
+      .catch((error) => {
+        if (error.status === 401) {
+          sessionStorage.removeItem('token');
+          setToken('');
+          setUsuario(null);
+          return;
+        }
+        setErrorSesion(error.message);
       })
       .finally(() => setCargando(false));
-  }, [token]);
+  }, [token, intentoValidacion]);
 
   const iniciarSesion = ({ token: nuevoToken, user }) => {
     sessionStorage.setItem('token', nuevoToken);
@@ -708,6 +719,16 @@ export default function App() {
 
   if (cargando) {
     return <main className="pantalla-carga"><span className="marca-icono">T</span><p>Conectando con TransPort 3000 S.A…</p></main>;
+  }
+  if (errorSesion) {
+    return (
+      <main className="pantalla-carga">
+        <span className="marca-icono">T</span>
+        <p className="mensaje error" role="alert">{errorSesion}</p>
+        <button className="boton boton-principal" onClick={() => setIntentoValidacion((intento) => intento + 1)}>Reintentar</button>
+        <button className="boton boton-secundario" onClick={cerrarSesion}>Volver al inicio</button>
+      </main>
+    );
   }
   if (usuario && token) return <PanelPrincipal token={token} usuario={usuario} cerrarSesion={cerrarSesion} />;
   if (seccionPublica === 'acceso') {
