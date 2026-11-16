@@ -1,0 +1,201 @@
+@baseUrl = http://localhost:3001/api
+@token = reemplazar_por_el_token_de_inicio_de_sesion
+@vehiculoId = 1
+@conductorId = 1
+@viajeId = 1
+
+### Registrar usuario (solo la primera vez)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "nombre": "Usuario de prueba",
+  "email": "usuario@example.com",
+  "contrasena": "ClaveSegura123"
+}
+
+### Iniciar sesión; copiar el token de la respuesta en @token
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "usuario@example.com",
+  "contrasena": "ClaveSegura123"
+}
+
+### Verificar usuario autenticado
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+### Listar vehículos
+GET {{baseUrl}}/vehiculos?limit=20&offset=0
+Authorization: Bearer {{token}}
+
+### Crear vehículo
+POST {{baseUrl}}/vehiculos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "marca": "Mercedes-Benz",
+  "modelo": "Actros",
+  "patente": "AB123CD",
+  "anio": 2024,
+  "capacidadCarga": 12000
+}
+
+### Obtener vehículo (ajustar @vehiculoId si corresponde)
+GET {{baseUrl}}/vehiculos/{{vehiculoId}}
+Authorization: Bearer {{token}}
+
+### Modificar vehículo
+PUT {{baseUrl}}/vehiculos/{{vehiculoId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "marca": "Mercedes-Benz",
+  "modelo": "Actros",
+  "patente": "AB123CD",
+  "anio": 2024,
+  "capacidadCarga": 12500
+}
+
+### Rechazar capacidad no válida (400)
+POST {{baseUrl}}/vehiculos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "marca": "Marca",
+  "modelo": "Modelo",
+  "patente": "XX123XX",
+  "anio": 2024,
+  "capacidadCarga": 0
+}
+
+### Listar conductores
+GET {{baseUrl}}/conductores?limit=20&offset=0
+Authorization: Bearer {{token}}
+
+### Crear conductor
+POST {{baseUrl}}/conductores
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombre": "Ana",
+  "apellido": "Pérez",
+  "numeroDocumento": "30123456",
+  "numeroLicencia": "LIC123456",
+  "fechaAltaLicencia": "2022-05-10",
+  "fechaVencimientoLicencia": "2028-05-10"
+}
+
+### Obtener conductor (ajustar @conductorId si corresponde)
+GET {{baseUrl}}/conductores/{{conductorId}}
+Authorization: Bearer {{token}}
+
+### Modificar conductor
+PUT {{baseUrl}}/conductores/{{conductorId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombre": "Ana",
+  "apellido": "Pérez",
+  "numeroDocumento": "30123456",
+  "numeroLicencia": "LIC123456",
+  "fechaAltaLicencia": "2022-05-10",
+  "fechaVencimientoLicencia": "2029-05-10"
+}
+
+### Rechazar vencimiento anterior al alta (400)
+POST {{baseUrl}}/conductores
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombre": "Luis",
+  "apellido": "Gómez",
+  "numeroDocumento": "30987654",
+  "numeroLicencia": "LIC654321",
+  "fechaAltaLicencia": "2024-01-01",
+  "fechaVencimientoLicencia": "2023-12-31"
+}
+
+### Registrar viaje (ajustar los ids a registros existentes)
+POST {{baseUrl}}/viajes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "vehiculoId": {{vehiculoId}},
+  "conductorId": {{conductorId}},
+  "fechaSalida": "2026-11-16T08:00",
+  "fechaLlegada": null,
+  "origen": "La Rioja",
+  "destino": "Córdoba",
+  "kilometros": 450,
+  "observaciones": "Carga general"
+}
+
+### Consultar historial por vehículo y conductor
+GET {{baseUrl}}/viajes?vehiculoId={{vehiculoId}}&conductorId={{conductorId}}&limit=20&offset=0
+Authorization: Bearer {{token}}
+
+### Consultar kilómetros acumulados
+GET {{baseUrl}}/viajes/resumen
+Authorization: Bearer {{token}}
+
+### Consultar kilómetros con filtros
+GET {{baseUrl}}/viajes/resumen?vehiculoId={{vehiculoId}}&conductorId={{conductorId}}
+Authorization: Bearer {{token}}
+
+### Obtener viaje
+GET {{baseUrl}}/viajes/{{viajeId}}
+Authorization: Bearer {{token}}
+
+### Modificar viaje
+PUT {{baseUrl}}/viajes/{{viajeId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "vehiculoId": {{vehiculoId}},
+  "conductorId": {{conductorId}},
+  "fechaSalida": "2026-11-16T08:00",
+  "fechaLlegada": "2026-11-16T15:00",
+  "origen": "La Rioja",
+  "destino": "Córdoba",
+  "kilometros": 455,
+  "observaciones": "Carga general"
+}
+
+### Rechazar llegada anterior a la salida (400)
+POST {{baseUrl}}/viajes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "vehiculoId": {{vehiculoId}},
+  "conductorId": {{conductorId}},
+  "fechaSalida": "2026-11-16T15:00",
+  "fechaLlegada": "2026-11-16T08:00",
+  "origen": "La Rioja",
+  "destino": "Córdoba",
+  "kilometros": 450,
+  "observaciones": "Validación de fechas"
+}
+
+### Eliminar viaje
+DELETE {{baseUrl}}/viajes/{{viajeId}}
+Authorization: Bearer {{token}}
+
+### Eliminar conductor (puede responder 409 si tiene viajes asociados)
+DELETE {{baseUrl}}/conductores/{{conductorId}}
+Authorization: Bearer {{token}}
+
+### Eliminar vehículo (puede responder 409 si tiene viajes asociados)
+DELETE {{baseUrl}}/vehiculos/{{vehiculoId}}
+Authorization: Bearer {{token}}
