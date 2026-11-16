@@ -3,7 +3,8 @@ const cors = require('cors');
 const express = require('express');
 const passport = require('passport');
 const pool = require('./db');
-const { router: authRouter } = require('./auth');
+const { router: authRouter, autenticar } = require('./auth');
+const vehiculosRouter = require('./vehiculos');
 
 const app = express();
 const origenesFrontend = new Set([
@@ -24,6 +25,7 @@ app.get('/api/status', async (req, res) => {
   res.json({ data: { estado: 'activo', empresa: 'TransPort 3000 S.A' } });
 });
 app.use('/api/auth', authRouter);
+app.use('/api/vehiculos', autenticar, vehiculosRouter);
 
 app.use((req, res) => res.status(404).json({ error: 'Recurso no encontrado' }));
 
