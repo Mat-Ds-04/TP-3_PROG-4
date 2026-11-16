@@ -7,7 +7,15 @@ async function solicitar(ruta, token, opciones = {}) {
   if (opciones.body) cabeceras['Content-Type'] = 'application/json';
   if (token) cabeceras.Authorization = `Bearer ${token}`;
 
-  const respuesta = await fetch(`${API_URL}${ruta}`, { ...opciones, headers: cabeceras });
+  let respuesta;
+  try {
+    respuesta = await fetch(`${API_URL}${ruta}`, { ...opciones, headers: cabeceras });
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new Error('No se pudo conectar con la API. Verificá que el backend esté en ejecución e intentá nuevamente.');
+    }
+    throw error;
+  }
   if (respuesta.status === 204) return null;
 
   const resultado = await respuesta.json();
