@@ -1,7 +1,9 @@
 require('dotenv').config();
 const cors = require('cors');
 const express = require('express');
+const passport = require('passport');
 const pool = require('./db');
+const { router: authRouter } = require('./auth');
 
 const app = express();
 const origenesFrontend = new Set([
@@ -15,11 +17,13 @@ app.use(cors({
   },
 }));
 app.use(express.json({ limit: '16kb' }));
+app.use(passport.initialize());
 
 app.get('/api/status', async (req, res) => {
   await pool.execute('SELECT 1');
   res.json({ data: { estado: 'activo', empresa: 'TransPort 3000 S.A' } });
 });
+app.use('/api/auth', authRouter);
 
 app.use((req, res) => res.status(404).json({ error: 'Recurso no encontrado' }));
 
