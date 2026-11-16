@@ -6,6 +6,7 @@ const pool = require('./db');
 const { router: authRouter, autenticar } = require('./auth');
 const conductoresRouter = require('./conductores');
 const vehiculosRouter = require('./vehiculos');
+const viajesRouter = require('./viajes');
 
 const app = express();
 const origenesFrontend = new Set([
@@ -28,6 +29,7 @@ app.get('/api/status', async (req, res) => {
 app.use('/api/auth', authRouter);
 app.use('/api/vehiculos', autenticar, vehiculosRouter);
 app.use('/api/conductores', autenticar, conductoresRouter);
+app.use('/api/viajes', autenticar, viajesRouter);
 
 app.use((req, res) => res.status(404).json({ error: 'Recurso no encontrado' }));
 
