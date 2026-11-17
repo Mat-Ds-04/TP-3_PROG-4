@@ -201,7 +201,7 @@ function PanelVehiculos({ token }) {
   const cargar = useCallback(async () => {
     try {
       const resultado = await solicitar('/vehiculos?limit=100&offset=0', token);
-      setVehiculos(resultado.data);
+      setVehiculos(resultado);
       setError('');
     } catch (solicitudError) {
       setError(solicitudError.message);
@@ -314,7 +314,7 @@ function PanelConductores({ token }) {
   const cargar = useCallback(async () => {
     try {
       const resultado = await solicitar('/conductores?limit=100&offset=0', token);
-      setConductores(resultado.data);
+      setConductores(resultado);
       setError('');
     } catch (solicitudError) {
       setError(solicitudError.message);
@@ -456,10 +456,10 @@ function PanelViajes({ token }) {
         solicitar('/vehiculos?limit=100&offset=0', token),
         solicitar('/conductores?limit=100&offset=0', token),
       ]);
-      setViajes(lista.data);
+      setViajes(lista);
       setResumen(datosResumen);
-      setVehiculos(listaVehiculos.data);
-      setConductores(listaConductores.data);
+      setVehiculos(listaVehiculos);
+      setConductores(listaConductores);
       setError('');
     } catch (solicitudError) {
       setError(solicitudError.message);
